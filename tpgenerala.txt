@@ -1,0 +1,331 @@
+#include<iostream>
+#include<ctime>
+using namespace std;
+
+//Declaracion de las funciones
+void jugada(int dados[][6], int mano[]);
+
+void mostrarJugada(int mano[]);
+	
+void ordenar(int mano[]);
+	
+void contarOcurrencias(int mano[], int ocurrencias[]);
+
+void evaluarJugada(int mano[], int puntajes[]);	
+
+bool esFull(int ocurrencias[]);
+	
+bool esPoker(int ocurrencias[]);	
+	
+bool esEscalera(int mano[]);
+
+bool esGenerala(int ocurrencias[]);
+	
+void mostrarPuntajes(int puntajes[]);
+	
+int verPuntajeFinal(int puntajes[]);
+
+	
+int main (int argc, char *argv[]) {
+	
+	//Inicializo la semilla para la seleccion de numeros aleatorios
+	srand(time(NULL));
+	
+	//Matriz de 5x6 para los 5 dados
+	int dados[5][6]={
+		{1,2,3,4,5,6},
+		{1,2,3,4,5,6},
+		{1,2,3,4,5,6},
+		{1,2,3,4,5,6},
+		{1,2,3,4,5,6}};
+	
+	//El resultado de cada dado de cada tirada se almacena en el arreglo correspondiente al jugador o la PC
+	int manoJugador[5]={0,0,0,0,0};	
+	int manoPC[5]={0,0,0,0,0};	
+	
+	//El puntaje de cada juego posible (c/u de los numeros, full, poker, escalera, y generala) se almacena en un arreglo
+	int puntajesJugador[10]={0,0,0,0,0,0,0,0,0,0};
+	int puntajesPC[10]={0,0,0,0,0,0,0,0,0,0};
+	
+	int puntajeFinalJugador=0;
+	int puntajeFinalPC=0;
+	
+	cout<<"Generala - Si hay empate gana la PC. Suerte!!!!"<<endl;
+	
+	cout<<endl;
+	
+	//Juega el usuario
+	jugada(dados,manoJugador);
+	
+	cout<<"Tirada jugador: ";
+	
+	mostrarJugada(manoJugador);
+	
+	//Almaceno en el arreglo de puntajes correspondiente el total de cada uno de los 10 juegos posibles
+	evaluarJugada(manoJugador,puntajesJugador);
+	
+	mostrarPuntajes(puntajesJugador);
+	
+	puntajeFinalJugador=verPuntajeFinal(puntajesJugador);
+	
+	cout<<"Puntaje Final de la jugada del usuario: "<<puntajeFinalJugador;
+
+	cout<<endl;
+	cout<<endl;
+	
+	//Juega la PC
+	jugada(dados,manoPC);
+	
+	cout<<"Tirada PC: ";
+	
+	mostrarJugada(manoPC);
+	
+	evaluarJugada(manoPC,puntajesPC);
+	
+	mostrarPuntajes(puntajesPC);
+	
+	puntajeFinalPC=verPuntajeFinal(puntajesPC);
+	
+	cout<<"Puntaje Final de la jugada de la PC: "<<puntajeFinalPC;
+	
+	cout<<endl;
+	cout<<endl;
+	
+	if (puntajeFinalJugador>puntajeFinalPC){
+		
+		cout<<"Ganaste!!!!";
+		
+	} else {
+		
+		cout<<"Perdiste!!!!";
+	}
+	
+	return 0;
+}
+
+
+//Implementacion de las funciones
+
+//Se selecciona al azar el valor de c/u de los 5 dados
+void jugada(int dados[][6], int mano[]){
+	
+	for (int i=0;i<5;i++){
+		
+		int n=rand()%6;
+		mano[i]=dados[i][n];
+	}
+}
+	
+//Muestra en pantalla el resultado de la tirada correspondiente
+void mostrarJugada(int mano[]){
+	
+	for (int i=0;i<5;i++){
+		
+		cout<<mano[i];
+		cout<<" ";
+	}	
+	
+	cout<<endl;
+}
+	
+//Ordeno de menor a mayor la tirada para facilitar la evalucion de los juegos
+void ordenar(int mano[]){
+	
+	int aux=0;
+	
+	for (int j=0;j<5;j++){		
+		
+		for (int i=0;i<4;i++){
+			
+			if (mano[i]>mano[i+1]){
+				
+				aux=mano[i];
+				
+				mano[i]=mano[i+1];
+				mano[i+1]=aux;
+			}
+		}
+	}	
+}
+	
+//Declaro un arreglo "ocurrencias"  (len 6) que almacenara cuantas veces salio cada valor de la tirada
+//Evaluo cada jugada posible llamando a las funciones correspondientes y almacenando el resultado en el arreglo de puntajes
+
+void evaluarJugada(int mano[], int puntajes[]){
+	
+	int ocurrencias[6]={0,0,0,0,0,0};	
+	
+	ordenar(mano);
+	
+	contarOcurrencias(mano,ocurrencias);
+	
+	//Evaluo los numeros
+	for (int i=0;i<6;i++){
+		
+		puntajes[i]=ocurrencias[i]*(i+1);			
+	}
+	
+	//Evaluo el Full
+	if (esFull(ocurrencias)){
+		
+		puntajes[6]=30;
+	} 
+	
+	//Evaluo el Poker
+	if (esPoker(ocurrencias)){
+		
+		puntajes[7]=40;
+	} 
+	
+	//Evaluo la Escalera
+	if (esEscalera(mano)){
+		
+		puntajes[8]=50;
+	} 
+	
+	//Evaluo la Generala
+	if (esGenerala(ocurrencias)){
+		
+		puntajes[9]=60;
+	} 
+}
+	
+//Almaceno en un arreglo de "ocurrencias" la cantidad de veces que salio c/u de los 6 numeros en la tirada
+void contarOcurrencias(int mano[], int ocurrencias[]){
+	
+	for (int i=0;i<5;i++){
+		
+		int numero=mano[i];
+		
+		switch(numero){
+			
+		case 1:
+			ocurrencias[0]++;
+			break;
+		case 2:
+			ocurrencias[1]++;
+			break;
+		case 3:
+			ocurrencias[2]++;
+			break;
+		case 4:
+			ocurrencias[3]++;
+			break;
+		case 5:
+			ocurrencias[4]++;
+			break;
+		case 6:
+			ocurrencias[5]++;
+			break;			
+		}
+	}
+}
+
+//Determino si hay una jugada "Full" en la tirada viendo si hay una cantidad de 2 y 3 apariciones en dos numeros en la tirada
+bool esFull(int ocurrencias[]){
+	
+	bool hayDos=false;
+	bool hayTres=false;
+	
+	for (int i=0;i<6;i++){
+		
+		if (ocurrencias[i]==2){
+			hayDos=true;
+		}
+		
+		if (ocurrencias[i]==3){
+			hayTres=true;
+		}
+	}
+	
+	return hayDos && hayTres;
+}
+	
+//Determino si hay una jugada "Poker" en la tirada viendo si hay una cantidad de 4 apariciones en algun numero de la tirada
+bool esPoker(int ocurrencias[]){
+	
+	bool hayCuatro=false;
+	
+	for (int i=0;i<6;i++){
+		
+		if (ocurrencias[i]==4){
+			hayCuatro=true;
+			break;
+		}
+	}
+	
+	return hayCuatro;
+}
+	
+//Determino si hay una jugada "Generala" en la tirada viendo si hay una cantidad de 5 apariciones en algun numero de la tirada
+bool esGenerala(int ocurrencias[]){
+	
+	bool hayCinco=false;
+	
+	for (int i=0;i<6;i++){
+		
+		if (ocurrencias[i]==5){
+			hayCinco=true;
+			break;
+		}
+	}
+	
+	return hayCinco;
+}
+	
+//Determino si hay una jugada "Escalera" en la tirada viendo si en 4 ocasiones en la tirada los numeros son sucesivos
+bool esEscalera(int mano[]){
+	
+	bool hayEscalera=false;
+	int cont=0;
+	
+	for (int i=0;i<4;i++){
+		
+		if (mano[i+1]-mano[i]==1){
+			cont++;
+		}
+	}
+	
+	if (cont==4){
+		hayEscalera=true;
+	}
+	
+	return hayEscalera;
+}
+	
+//Muestro los resultados por pantalla
+void mostrarPuntajes(int puntajes[]){
+	
+	string textos[10]={
+		"Todo al 1: ",
+			"Todo al 2: ",
+			"Todo al 3: ",
+			"Todo al 4: ",
+			"Todo al 5: ",
+			"Todo al 6: ",
+			"Full: ",
+			"Poker: ",
+			"Escalera: ",
+			"Generala: "};
+	
+	for (int i=0;i<10;i++){
+		
+		cout<<textos[i]<<puntajes[i]<<endl;
+	}
+}
+	
+//Busco el mejor puntaje obtenido en la tirada con el arreglo de puntajes
+int verPuntajeFinal(int puntajes[]){
+	
+	int elMayor=0;
+	
+	for (int i=0;i<10;i++){
+		
+		if (puntajes[i]>elMayor){
+			
+			elMayor=puntajes[i];
+		}
+	}
+	
+	return elMayor;
+}
