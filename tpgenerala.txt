@@ -1,5 +1,6 @@
 #include<iostream>
 #include<ctime>
+#include <conio2.h>
 using namespace std;
 
 //Declaracion de las funciones
@@ -25,9 +26,11 @@ void mostrarPuntajes(int puntajes[]);
 	
 int verPuntajeFinal(int puntajes[]);
 
+void inicializarArray(int array[],int len);
+
 	
 int main (int argc, char *argv[]) {
-	
+
 	//Inicializo la semilla para la seleccion de numeros aleatorios
 	srand(time(NULL));
 	
@@ -39,72 +42,118 @@ int main (int argc, char *argv[]) {
 		{1,2,3,4,5,6},
 		{1,2,3,4,5,6}};
 	
-	//El resultado de cada dado de cada tirada se almacena en el arreglo correspondiente al jugador o la PC
-	int manoJugador[5]={0,0,0,0,0};	
-	int manoPC[5]={0,0,0,0,0};	
+	//El resultado de cada dado de cada tirada se almacena en un arreglo correspondiente al jugador o la PC
+	int manoJugador[5];	
+	int manoPC[5];
+	
+	inicializarArray(manoJugador,5);
+	inicializarArray(manoPC,5);
 	
 	//El puntaje de cada juego posible (c/u de los numeros, full, poker, escalera, y generala) se almacena en un arreglo
-	int puntajesJugador[10]={0,0,0,0,0,0,0,0,0,0};
-	int puntajesPC[10]={0,0,0,0,0,0,0,0,0,0};
+	int puntajesJugador[10];
+	int puntajesPC[10];
+	
+	inicializarArray(puntajesJugador,10);
+	inicializarArray(puntajesPC,10);
 	
 	int puntajeFinalJugador=0;
 	int puntajeFinalPC=0;
 	
 	cout<<"Generala - Si hay empate gana la PC. Suerte!!!!"<<endl;
-	
+	cout<<"P - Jugar ... E - Salir"<<endl;
 	cout<<endl;
 	
-	//Juega el usuario
-	jugada(dados,manoJugador);
+	bool play=true;
 	
-	cout<<"Tirada jugador: ";
-	
-	mostrarJugada(manoJugador);
-	
-	//Almaceno en el arreglo de puntajes correspondiente el total de cada uno de los 10 juegos posibles
-	evaluarJugada(manoJugador,puntajesJugador);
-	
-	mostrarPuntajes(puntajesJugador);
-	
-	puntajeFinalJugador=verPuntajeFinal(puntajesJugador);
-	
-	cout<<"Puntaje Final de la jugada del usuario: "<<puntajeFinalJugador;
+	while (play){
+		
+		if (kbhit()){
+			
+			int tecla=getch();
+			
+			switch (tecla){
+				
+			case 'P':
+				
+				inicializarArray(manoJugador,5);
+				inicializarArray(manoPC,5);
+				
+				inicializarArray(puntajesJugador,10);
+				inicializarArray(puntajesPC,10);
+				
+				puntajeFinalJugador=0;
+				puntajeFinalPC=0;
+				
+				//Juega el usuario
+				jugada(dados,manoJugador);
+				
+				cout<<"Tirada jugador: ";
+				
+				mostrarJugada(manoJugador);
+				
+				//Almaceno en el arreglo de puntajes correspondiente el total de cada uno de los 10 juegos posibles
+				evaluarJugada(manoJugador,puntajesJugador);
+				
+				mostrarPuntajes(puntajesJugador);
+				
+				puntajeFinalJugador=verPuntajeFinal(puntajesJugador);
+				
+				cout<<"Puntaje Final de la jugada del usuario: "<<puntajeFinalJugador;
 
-	cout<<endl;
-	cout<<endl;
-	
-	//Juega la PC
-	jugada(dados,manoPC);
-	
-	cout<<"Tirada PC: ";
-	
-	mostrarJugada(manoPC);
-	
-	evaluarJugada(manoPC,puntajesPC);
-	
-	mostrarPuntajes(puntajesPC);
-	
-	puntajeFinalPC=verPuntajeFinal(puntajesPC);
-	
-	cout<<"Puntaje Final de la jugada de la PC: "<<puntajeFinalPC;
-	
-	cout<<endl;
-	cout<<endl;
-	
-	if (puntajeFinalJugador>puntajeFinalPC){
-		
-		cout<<"Ganaste!!!!";
-		
-	} else {
-		
-		cout<<"Perdiste!!!!";
+				cout<<endl;
+				cout<<endl;
+				
+				//Juega la PC
+				jugada(dados,manoPC);
+				
+				cout<<"Tirada PC: ";
+				
+				mostrarJugada(manoPC);
+				
+				evaluarJugada(manoPC,puntajesPC);
+				
+				mostrarPuntajes(puntajesPC);
+				
+				puntajeFinalPC=verPuntajeFinal(puntajesPC);
+				
+				cout<<"Puntaje Final de la jugada de la PC: "<<puntajeFinalPC;
+				
+				cout<<endl;
+				cout<<endl;
+				
+				if (puntajeFinalJugador>puntajeFinalPC){
+					
+					cout<<"Ganaste!!!!";
+					
+				} else {
+					
+					cout<<"Perdiste!!!!";
+				}	
+				
+				cout<<endl;
+				break;
+						
+			case 'E':
+				
+				play=false;
+				break;
+			}
+		}
 	}
 	
-	return 0;
+
+	return 0;			
 }
-
-
+		
 //Implementacion de las funciones
+
+void inicializarArray(int array[],int len){
+	
+	for (int i=0;i<len;i++){
+		
+		array[i]=0;
+	}
+}
 
 //Se selecciona al azar el valor de c/u de los 5 dados
 void jugada(int dados[][6], int mano[]){
@@ -150,7 +199,6 @@ void ordenar(int mano[]){
 	
 //Declaro un arreglo "ocurrencias"  (len 6) que almacenara cuantas veces salio cada valor de la tirada
 //Evaluo cada jugada posible llamando a las funciones correspondientes y almacenando el resultado en el arreglo de puntajes
-
 void evaluarJugada(int mano[], int puntajes[]){
 	
 	int ocurrencias[6]={0,0,0,0,0,0};	
